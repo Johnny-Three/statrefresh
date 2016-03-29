@@ -9,6 +9,7 @@ import (
 )
 
 var db1, db2 *sql.DB
+var listening string
 var config_file_path string
 
 func init() {
@@ -16,14 +17,16 @@ func init() {
 }
 
 //EnvBuild需要正确的解析文件并且初始化DB和Redis的连接。。
-func EnvBuild() (*sql.DB, *sql.DB, error) {
+func EnvBuild() (*sql.DB, *sql.DB, string, error) {
 
 	//get conf
 	cf, err := config.ReadConfigFile(config_file_path)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
+
+	rlip1, _ := cf.GetString("LISTENING", "IP")
 
 	rdip1, _ := cf.GetString("DBCONN1", "IP")
 	rdusr1, _ := cf.GetString("DBCONN1", "USERID")
@@ -53,5 +56,5 @@ func EnvBuild() (*sql.DB, *sql.DB, error) {
 	db2.SetMaxIdleConns(10)
 	db2.Ping()
 
-	return db1, db2, nil
+	return db1, db2, rlip1, nil
 }

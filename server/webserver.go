@@ -16,6 +16,7 @@ import (
 )
 
 var db1, db2 *sql.DB
+var listenip string
 var request_seq int32
 var refresh_request_map *BeeMap
 
@@ -24,9 +25,9 @@ func init() {
 	refresh_request_map = NewBeeMap()
 }
 
-func WebServerBase(db01, db02 *sql.DB) {
+func WebServerBase(db01, db02 *sql.DB, ipin string) {
 
-	db1, db2 = db01, db02
+	db1, db2, listenip = db01, db02, ipin
 
 	fmt.Println("This is webserver base!")
 	//第一个参数为客户端发起http请求时的接口名，第二个参数是一个func，负责处理这个请求。
@@ -36,7 +37,7 @@ func WebServerBase(db01, db02 *sql.DB) {
 	http.HandleFunc("/getstatprogress", getprogress)
 
 	//服务器要监听的主机地址和端口号
-	err := http.ListenAndServe("192.168.101.127:8082", nil)
+	err := http.ListenAndServe(listenip, nil)
 
 	if err != nil {
 		fmt.Println("ListenAndServe error: ", err.Error())
