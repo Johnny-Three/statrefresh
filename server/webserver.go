@@ -146,6 +146,8 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 
+		result := NewBaseJsonBean()
+
 		//test json style ..
 		postinfo, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
@@ -153,12 +155,41 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("in r post ", err)
 			return
 		}
+
+		if len(postinfo) == 0 {
+
+			result.Code = 102
+			result.Message = "Post格式或信息有误，请检查"
+			bytes, _ := json.Marshal(result)
+			fmt.Fprint(w, string(bytes))
+
+			return
+		}
+
 		fmt.Printf("parse post result is %s\n", postinfo)
 
-		result := NewBaseJsonBean()
-
 		var rf Refresh
-		json.Unmarshal(postinfo, &rf)
+		err = json.Unmarshal(postinfo, &rf)
+
+		if err != nil {
+
+			result.Code = 102
+			result.Message = "Post数据非json格式，请检查"
+			bytes, _ := json.Marshal(result)
+			fmt.Fprint(w, string(bytes))
+
+			return
+		}
+
+		if rf.St == 0 || rf.Et == 0 || rf.Id == 0 {
+
+			result.Code = 102
+			result.Message = "Post数据信息有误，请检查"
+			bytes, _ := json.Marshal(result)
+			fmt.Fprint(w, string(bytes))
+
+			return
+		}
 
 		if rf.Et < rf.St {
 
@@ -171,6 +202,18 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 
 		}
 
+		//查看是否有人...
+		youmeiyou := Youmeiyouren(db1, &rf)
+		//没有人
+		if youmeiyou == false {
+
+			result.Code = 102
+			result.Message = "数据错误，查询数据库，对应ID下没有人"
+			bytes, _ := json.Marshal(result)
+			fmt.Fprint(w, string(bytes))
+
+			return
+		}
 		// 检查键值是否存在，如果存在则打印
 		ifexist := refresh_request_map.Check(string(postinfo))
 

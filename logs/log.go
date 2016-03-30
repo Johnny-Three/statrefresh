@@ -14,10 +14,10 @@ func loadAppConfig() {
             <console />    
         </filter>
         <filter levels="info">
-            <rollingfile formatid="info" type="size" filename="/tmp/ma_roll.log" maxsize="100000" maxrolls="5" />
+            <rollingfile formatid="info" type="size" filename="/tmp/refresh_roll.log" maxsize="100000" maxrolls="5" />
         </filter>
         <filter levels="critical,error">
-            <file formatid="critical" path="../../log/ma_error.log"/>
+            <file formatid="critical" path="../../log/refresh.log"/>
         </filter>
     </outputs>
     <formats>

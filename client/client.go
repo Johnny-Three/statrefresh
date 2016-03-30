@@ -83,15 +83,15 @@ func post(t string) {
 				]
 			}
 		*/
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 2; i++ {
 
 			var s Refresh
 
 			//s.Groupinfo = Groupinfo{Gid: 11004, St: 1452873600, Et: 1500000600}
-			s.Et = 1454601600
-			s.St = 1454515200
-			s.Id = 220
-			s.Type = 2
+			s.Et = 1459180800
+			s.St = 1458921600
+			s.Id = 267314
+			s.Type = 1
 			//s.Id = 138
 			//s.Type = 1
 
