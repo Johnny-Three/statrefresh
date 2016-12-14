@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync/atomic"
+	"time"
 	. "wbproject/chufangrefresh/dbop"
 	. "wbproject/chufangrefresh/logs"
 	. "wbproject/chufangrefresh/structure"
@@ -23,6 +24,28 @@ var refresh_request_map *BeeMap
 func init() {
 
 	refresh_request_map = NewBeeMap()
+}
+
+func CheckAndDeleteMap() {
+
+	for _, key := range refresh_request_map.Items() {
+
+		uploadid := Deal_status_map.Get(key)
+		//找到对应的key
+		if uploadid != nil {
+			ifexist := SelectUploadid(db2, uploadid.(int))
+			//找到，说明尚未处理；未找到，说明已经处理完毕
+			if ifexist == true {
+				continue
+			} else {
+				refresh_request_map.Delete(key)
+				Deal_status_map.Delete(key)
+				continue
+			}
+		}
+	}
+	//休息5S，继续观察
+	time.Sleep(time.Duration(5) * time.Second)
 }
 
 func WebServerBase(db01, db02 *sql.DB, ipin string) {

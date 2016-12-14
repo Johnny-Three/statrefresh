@@ -22,7 +22,7 @@ func get() {
 
 	time.Sleep(1 * time.Second)
 
-	response, err := http.Get("http://192.168.101.127:8082/getstatprogress?seq=1000")
+	response, err := http.Get("http://192.168.101.255:8082/getstatprogress?seq=1000")
 	if err != nil {
 
 		fmt.Println("err happens ", err)
@@ -99,9 +99,9 @@ func post(t string) {
 
 			body := bytes.NewBuffer(b)
 
-			resp, err := http.Post("http://192.168.101.127:8082/refresh", "application/json", body)
+			resp, err := http.Post("http://192.168.101.150:8082/refresh", "application/json", body)
 
-			defer resp.Body.Close()
+			//defer resp.Body.Close()
 			if err != nil {
 				fmt.Println(err)
 			} else {

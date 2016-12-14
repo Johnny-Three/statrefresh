@@ -6,7 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	//"strconv"
 	//"strconv"
-	//"errors"
+	"errors"
 	//. "wbproject/chufangrefresh/logs"
 	. "wbproject/chufangrefresh/structure"
 	. "wbproject/chufangrefresh/util"
@@ -137,6 +137,11 @@ func InsertUid(uid int, st int64, et int64) error {
 
 	count := int((et - st) / 86400)
 
+	if count > 730 {
+
+		return errors.New("刷新数据量超过了两年，不予刷新")
+	}
+
 	for i := 0; i <= count; i++ {
 
 		arr_userinfo = append(
@@ -198,6 +203,12 @@ func InsertAid(aid int, st int64, et int64) error {
 		}
 
 		count := int((et - st) / 86400)
+
+		if count > 730 {
+
+			return errors.New("刷新数据量超过了两年，不予刷新")
+
+		}
 
 		for i := 0; i <= count; i++ {
 
@@ -295,6 +306,12 @@ func InsertGid(gid int, st int64, et int64) error {
 
 		count := int((et - st) / 86400)
 
+		if count > 730 {
+
+			return errors.New("刷新数据量超过了两年，不予刷新")
+
+		}
+
 		for i := 0; i <= count; i++ {
 
 			arr_userinfo = append(
@@ -307,13 +324,6 @@ func InsertGid(gid int, st int64, et int64) error {
 	}
 
 	fmt.Printf("用户记录总数为【%d】\n ", len(arr_userinfo))
-
-	/*
-		if len(arr_userinfo) == 0 {
-			Logger.Criticaf("uid:[%d];st:[%d];et:[%d],所刷任务记录数为空", uid, st, et)
-			return errors.New("所刷任务记录数为空")
-		}
-	*/
 
 	stepth := len(arr_userinfo) / def
 	fmt.Printf("分【%d】次插入hmp_data_eventqueue表，每次%d条\n", stepth, def)
