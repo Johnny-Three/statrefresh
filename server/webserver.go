@@ -26,26 +26,30 @@ func init() {
 	refresh_request_map = NewBeeMap()
 }
 
-func CheckAndDeleteMap() {
+func CheckAndDeleteMap(db2 *sql.DB) {
 
-	for _, key := range refresh_request_map.Items() {
+	for {
+		//休息3S，继续观察
+		time.Sleep(time.Duration(3) * time.Second)
 
-		uploadid := Deal_status_map.Get(key)
-		//找到对应的key
-		if uploadid != nil {
-			ifexist := SelectUploadid(db2, uploadid.(int))
-			//找到，说明尚未处理；未找到，说明已经处理完毕
-			if ifexist == true {
-				continue
-			} else {
-				refresh_request_map.Delete(key)
-				Deal_status_map.Delete(key)
-				continue
+		for key, _ := range refresh_request_map.Items() {
+
+			uploadid := Deal_status_map.Get(key)
+
+			//找到对应的key
+			if uploadid != nil {
+				ifexist := SelectUploadid(db2, uploadid.(int))
+				//找到，说明尚未处理；未找到，说明已经处理完毕
+				if ifexist == true {
+					continue
+				} else {
+					Deal_status_map.Delete(key)
+					refresh_request_map.Delete(key)
+					continue
+				}
 			}
 		}
 	}
-	//休息5S，继续观察
-	time.Sleep(time.Duration(5) * time.Second)
 }
 
 func WebServerBase(db01, db02 *sql.DB, ipin string) {
@@ -69,7 +73,7 @@ func WebServerBase(db01, db02 *sql.DB, ipin string) {
 
 func getprogress(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("getstatprogress is running...")
+	Logger.Infof("getstatprogress is running...")
 
 	result := NewBaseJsonBean()
 
@@ -82,7 +86,7 @@ func getprogress(w http.ResponseWriter, r *http.Request) {
 
 		if !found {
 
-			fmt.Println("seq is ", seq)
+			Logger.Infof("seq is ", seq)
 
 			result.Code = 102
 			result.Message = "Get 方法访问出错，请注意参数和URL拼写.."
@@ -90,8 +94,8 @@ func getprogress(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, string(bytes))
 			return
 		}
-		fmt.Println("seq is ", seq)
-		fmt.Println("refresh_request_map", refresh_request_map)
+		Logger.Infof("seq is ", seq)
+		Logger.Infof("refresh_request_map", refresh_request_map)
 
 		var seqin int
 		seqin, err := strconv.Atoi(seq[0])
@@ -119,7 +123,7 @@ func getprogress(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("Deal_status_map ", Deal_status_map)
+		Logger.Infof("Deal_status_map ", Deal_status_map)
 
 		uploadid := Deal_status_map.Get(key)
 
@@ -163,7 +167,7 @@ func getprogress(w http.ResponseWriter, r *http.Request) {
 
 func refresh(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("refresh is running...")
+	Logger.Infof("refresh is running...")
 	//获取客户端通过GET/POST方式传递的参数
 	r.ParseForm()
 
@@ -175,7 +179,7 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 		postinfo, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
 		if err != nil {
-			fmt.Println("in r post ", err)
+			Logger.Critical("in r post ", err)
 			return
 		}
 
@@ -189,7 +193,7 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Printf("parse post result is %s\n", postinfo)
+		Logger.Infof("parse post result is %s", postinfo)
 
 		var rf Refresh
 		err = json.Unmarshal(postinfo, &rf)

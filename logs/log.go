@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+
 	seelog "github.com/cihub/seelog"
 )
 
@@ -10,14 +11,14 @@ var Logger seelog.LoggerInterface
 func loadAppConfig() {
 	appConfig := `<seelog >
     <outputs formatid="main">
-        <filter levels="debug">    
+        <filter levels="info">    
             <console />    
         </filter>
         <filter levels="info">
-            <rollingfile formatid="info" type="size" filename="/tmp/refresh_roll.log" maxsize="100000" maxrolls="5" />
+            <rollingfile formatid="info" type="size" filename="../log/refresh_roll.log" maxsize="100000" maxrolls="5" />
         </filter>
         <filter levels="critical,error">
-            <file formatid="critical" path="../../log/refresh.log"/>
+            <file formatid="critical" path="../log/refresh_critical.log"/>
         </filter>
     </outputs>
     <formats>

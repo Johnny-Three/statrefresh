@@ -3,13 +3,13 @@ package dbop
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	//"strconv"
-	//"strconv"
+
 	"errors"
-	//. "wbproject/chufangrefresh/logs"
+	. "wbproject/chufangrefresh/logs"
 	. "wbproject/chufangrefresh/structure"
 	. "wbproject/chufangrefresh/util"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var db1, db2 *sql.DB
@@ -35,25 +35,25 @@ func InsertQueue(rf *Refresh, key01 string, db01, db02 *sql.DB) error {
 	switch rf.Type {
 
 	case 0:
-		fmt.Println("gettype is ", rf.Type)
+		Logger.Info("gettype is ", rf.Type)
 		//aid操作
 		err := InsertAid(rf.Id, rf.St, rf.Et)
 		return err
 
 	case 1:
-		fmt.Println("gettype is ", rf.Type)
+		Logger.Info("gettype is ", rf.Type)
 		//todo .. gid 操作
 		err := InsertGid(rf.Id, rf.St, rf.Et)
 		return err
 
 	case 2:
-		fmt.Println("gettype is ", rf.Type)
+		Logger.Info("gettype is ", rf.Type)
 		//todo .. uid 操作
 		err := InsertUid(rf.Id, rf.St, rf.Et)
 		return err
 
 	default:
-		fmt.Println(rf.Type, " is of a type I don't know how to handle")
+		Logger.Info(rf.Type, " is of a type I don't know how to handle")
 
 	}
 	return nil
@@ -105,8 +105,8 @@ func Process(db *sql.DB, uid int, date int64) (error, bool) {
 		return err, false
 	}
 
-	fmt.Println("in SelectUploadid ", uploadid)
-
+	Logger.Info("in SelectUploadid ", uploadid)
+	Logger.Info("deal_status_map set ", key, uploadid)
 	Deal_status_map.Set(key, uploadid)
 
 	return nil, true
@@ -152,7 +152,7 @@ func InsertUid(uid int, st int64, et int64) error {
 			})
 	}
 
-	fmt.Printf("用户记录总数为【%d】\n ", len(arr_userinfo))
+	Logger.Infof("用户记录总数为【%d】", len(arr_userinfo))
 
 	sqlStr := "insert into hmp.hmp_data_eventqueue(sourcetable,userid, walkdate, activeid,timestamp) VALUES "
 
@@ -221,10 +221,10 @@ func InsertAid(aid int, st int64, et int64) error {
 		}
 	}
 
-	fmt.Printf("用户记录总数为【%d】\n ", len(arr_userinfo))
+	Logger.Infof("用户记录总数为【%d", len(arr_userinfo))
 
 	stepth := len(arr_userinfo) / def
-	fmt.Printf("分【%d】次插入hmp_data_eventqueue表，每次%d条\n", stepth, def)
+	Logger.Infof("分【%d】次插入hmp_data_eventqueue表，每次%d条", stepth, def)
 
 	for i := 0; i < stepth; i++ {
 
@@ -245,7 +245,7 @@ func InsertAid(aid int, st int64, et int64) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录\n", len(arr_userinfo), stepth, i, def)
+		Logger.Infof("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录", len(arr_userinfo), stepth, i, def)
 	}
 
 	yu := len(arr_userinfo) % def
@@ -271,13 +271,13 @@ func InsertAid(aid int, st int64, et int64) error {
 			return err
 		}
 
-		fmt.Printf("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录\n", len(arr_userinfo), stepth, stepth,
+		Logger.Infof("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录", len(arr_userinfo), stepth, stepth,
 			len(arr_userinfo[stepth*def:]))
 	}
 
 	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date)
 
-	fmt.Println("没看错，他走到了这里，这意味着一个Refresh请求成功写入了DB")
+	Logger.Infof("没看错，他走到了这里，这意味着一个Refresh请求成功写入了DB")
 
 	return nil
 }
@@ -300,7 +300,7 @@ func InsertGid(gid int, st int64, et int64) error {
 		err := rows.Scan(&uid)
 
 		if err != nil {
-			fmt.Println("err xx is ", err)
+			Logger.Critical("err xx is ", err)
 			return err
 		}
 
@@ -323,10 +323,10 @@ func InsertGid(gid int, st int64, et int64) error {
 		}
 	}
 
-	fmt.Printf("用户记录总数为【%d】\n ", len(arr_userinfo))
+	Logger.Infof("用户记录总数为【%d】", len(arr_userinfo))
 
 	stepth := len(arr_userinfo) / def
-	fmt.Printf("分【%d】次插入hmp_data_eventqueue表，每次%d条\n", stepth, def)
+	Logger.Infof("分【%d】次插入hmp_data_eventqueue表，每次%d条", stepth, def)
 
 	for i := 0; i < stepth; i++ {
 
@@ -347,7 +347,7 @@ func InsertGid(gid int, st int64, et int64) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录\n", len(arr_userinfo), stepth, i, def)
+		Logger.Infof("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录", len(arr_userinfo), stepth, i, def)
 	}
 
 	yu := len(arr_userinfo) % def
@@ -373,13 +373,13 @@ func InsertGid(gid int, st int64, et int64) error {
 			return err
 		}
 
-		fmt.Printf("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录\n", len(arr_userinfo), stepth, stepth,
+		Logger.Infof("总[%d]条数据,总[%d]批,第[%d]批处理完毕,此批[%d]记录", len(arr_userinfo), stepth, stepth,
 			len(arr_userinfo[stepth*def:]))
 	}
 
 	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date)
 
-	fmt.Println("没看错，他走到了这里，这意味着一个Refresh请求成功写入了DB")
+	Logger.Infof("没看错，他走到了这里，这意味着一个Refresh请求成功写入了DB")
 
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 	. "wbproject/chufangrefresh/server"
 )
 
-var version string = "1.0.0PR6"
+var version string = "1.0.1PR1"
 
 func main() {
 
@@ -27,7 +27,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	go CheckAndDeleteMap()
+	go CheckAndDeleteMap(db2)
 
 	WebServerBase(db1, db2, ip)
 }
