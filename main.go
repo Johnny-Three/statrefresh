@@ -8,7 +8,7 @@ import (
 	. "wbproject/chufangrefresh/server"
 )
 
-var version string = "1.0.1PR1"
+var version string = "1.0.1PR2"
 
 func main() {
 

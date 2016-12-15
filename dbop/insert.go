@@ -37,19 +37,19 @@ func InsertQueue(rf *Refresh, key01 string, db01, db02 *sql.DB) error {
 	case 0:
 		Logger.Info("gettype is ", rf.Type)
 		//aid操作
-		err := InsertAid(rf.Id, rf.St, rf.Et)
+		err := InsertAid(rf.Id, rf.St, rf.Et, key)
 		return err
 
 	case 1:
 		Logger.Info("gettype is ", rf.Type)
 		//todo .. gid 操作
-		err := InsertGid(rf.Id, rf.St, rf.Et)
+		err := InsertGid(rf.Id, rf.St, rf.Et, key)
 		return err
 
 	case 2:
 		Logger.Info("gettype is ", rf.Type)
 		//todo .. uid 操作
-		err := InsertUid(rf.Id, rf.St, rf.Et)
+		err := InsertUid(rf.Id, rf.St, rf.Et, key)
 		return err
 
 	default:
@@ -85,7 +85,7 @@ func Youmeiyouren(db *sql.DB, rf *Refresh) bool {
 	err := row.Scan(&count)
 
 	if err != nil {
-
+		fmt.Println("error when check wanbu_group_user", err.Error())
 		return false
 	}
 
@@ -95,7 +95,7 @@ func Youmeiyouren(db *sql.DB, rf *Refresh) bool {
 	return false
 }
 
-func Process(db *sql.DB, uid int, date int64) (error, bool) {
+func Process(db *sql.DB, uid int, date int64, key string) (error, bool) {
 
 	var uploadid int
 	row := db.QueryRow("select uploadid from hmp_data_eventqueue where walkdate  = ? and userid= ?", date, uid)
@@ -120,18 +120,15 @@ func SelectUploadid(db *sql.DB, id int) bool {
 	err := row.Scan(&count)
 
 	if err != nil {
-
 		return false
 	}
-
 	if count > 0 {
 		return true
 	}
 	return false
-
 }
 
-func InsertUid(uid int, st int64, et int64) error {
+func InsertUid(uid int, st int64, et int64, key string) error {
 
 	var arr_userinfo []userinfo
 
@@ -174,12 +171,12 @@ func InsertUid(uid int, st int64, et int64) error {
 		return err
 	}
 
-	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date)
+	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date, key)
 
 	return nil
 }
 
-func InsertAid(aid int, st int64, et int64) error {
+func InsertAid(aid int, st int64, et int64, key string) error {
 
 	var uid int
 
@@ -275,14 +272,14 @@ func InsertAid(aid int, st int64, et int64) error {
 			len(arr_userinfo[stepth*def:]))
 	}
 
-	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date)
+	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date, key)
 
 	Logger.Infof("没看错，他走到了这里，这意味着一个Refresh请求成功写入了DB")
 
 	return nil
 }
 
-func InsertGid(gid int, st int64, et int64) error {
+func InsertGid(gid int, st int64, et int64, key string) error {
 
 	var uid int
 
@@ -377,7 +374,7 @@ func InsertGid(gid int, st int64, et int64) error {
 			len(arr_userinfo[stepth*def:]))
 	}
 
-	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date)
+	Process(db2, arr_userinfo[len(arr_userinfo)-1].userid, arr_userinfo[len(arr_userinfo)-1].date, key)
 
 	Logger.Infof("没看错，他走到了这里，这意味着一个Refresh请求成功写入了DB")
 

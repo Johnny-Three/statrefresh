@@ -35,7 +35,6 @@ func CheckAndDeleteMap(db2 *sql.DB) {
 		for key, _ := range refresh_request_map.Items() {
 
 			uploadid := Deal_status_map.Get(key)
-
 			//找到对应的key
 			if uploadid != nil {
 				ifexist := SelectUploadid(db2, uploadid.(int))
@@ -272,7 +271,6 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 
 		bytes, _ := json.Marshal(result)
 		fmt.Fprint(w, string(bytes))
-
 		go InsertQueue(&rf, string(postinfo), db1, db2)
 	}
 }
